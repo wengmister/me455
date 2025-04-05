@@ -6,3 +6,8 @@
 
 ## Q2. Visualize the likelihood function L(s), which is in the same domain as the sensor, across the whole search space X with the measurements from Problem 1. Visualize the measurements on top of the likelihood function plot (with the same color scheme from Problem 1). Note that you will need a mesh grid with at least 50 grid cells per dimension to suciently visualize the likelihood function. It is recommended to have 100 grid cells per dimension.
 ![q2](Q2.png)
+
+## Q3. Repeat the process for Problem 2, but uniformly sample one location in the space and assume that the sensor is stuck at that location for all 100 measurements. Note that the results may vary based on your samples. So randomize your samples for multiple times and feel free to include up to 3 plots if the results are different.    
+![q3](Q3.png)    
+
+## Q4. 

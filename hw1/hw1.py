@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
+# Python script turned out to be a real bad idea. Will probably use a jupyter notebook next time.
+
 resolution = 100
 
 def sample_by_location(sample, true_location):
@@ -120,15 +122,15 @@ def likelihood_from_samples(samples, readings, true_location):
     # Return the likelihood value
     return likelihood
 
-def visualize_likelihood():
+def visualize_likelihood(true_location):
     """
     This function visualizes the likelihood of the source location s given the samples and readings.
     It creates a grid of points and calculates the likelihood at each point using the likelihood_from_samples function.
     It then plots the likelihood as a heatmap.
     """
-    likelihood_resolution = 100
+    likelihood_resolution = 200
     # Generate 100 random samples in the range [0,1]
-    samples, readings = sample_100(np.array([0.3, 0.4]))
+    samples, readings = sample_100(true_location)
     # Calculate the likelihood of the samples given the true location
     # Create a grid of points
     x = np.linspace(0, 1, likelihood_resolution)
@@ -148,14 +150,80 @@ def visualize_likelihood():
     colors = ['green' if reading else 'red' for reading in readings]
     plt.scatter(samples[readings, 0], samples[readings, 1], color='green', label='True Readings')
     plt.scatter(samples[~readings, 0], samples[~readings, 1], color='red', label='False Readings')
-    plt.scatter(0.3,0.4, color='blue', marker='x', label='True Location')
+    plt.scatter(true_location[0], true_location[1], color='blue', marker='x', label='True Location')
     # Add labels and title
-    plt.title('Q2.Likelihood of Source Location')
+    plt.title('Q2.Likelihood of Source Location, resolution = {}'.format(likelihood_resolution))
     plt.xlabel('X coordinate')
     plt.ylabel('Y coordinate')
     plt.legend(loc='upper right')
     plt.show()
 
+def sample_same_point_100(true_location):
+    """
+    This function generates 100 measurements on the same random point.
+    It uses the sample_by_location function to determine if each sample is a true reading or not.
+    """
+    # Generate 1 random sample in the range [0,1]
+    num_samples = 1
+    samples = np.random.rand(num_samples, 2)
+
+    # Repeat the sample 100 times
+    samples = np.repeat(samples, 100, axis=0)
+    # Get the readings for each sample
+    readings = sample_by_location(samples, true_location)
+    return samples, readings
+
+def visualize_likelihood_on_same_point_with_subplots(true_location):
+    """
+    This function visualizes the likelihood of the source location s given the samples and readings
+    on the same point, repeated 3 times with different random seeds, and displays them in subplots.
+    """
+    likelihood_resolution = 100
+    seeds = [0, 42, 99]  # Different random seeds
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6), constrained_layout=True)  # Create 3 subplots in a single row
+
+    for i, seed in enumerate(seeds):
+        np.random.seed(seed)  # Set the random seed
+        samples, readings = sample_same_point_100(true_location)  # Generate samples and readings
+
+        # Create a grid of points
+        x = np.linspace(0, 1, likelihood_resolution)
+        y = np.linspace(0, 1, likelihood_resolution)
+        X, Y = np.meshgrid(x, y)
+
+        # Calculate the likelihood at each point
+        Z = np.zeros(X.shape)
+        for j in range(likelihood_resolution):
+            for k in range(likelihood_resolution):
+                location = np.array([X[j, k], Y[j, k]])
+                Z[j, k] = likelihood_from_samples(samples, readings, location)
+
+        # Plot the likelihood on the current subplot
+        ax = axes[i]
+        im = ax.imshow(Z, extent=(0, 1, 0, 1), origin='lower', cmap='magma')
+        ax.scatter(samples[readings, 0], samples[readings, 1], color='green', label='True Readings')
+        ax.scatter(samples[~readings, 0], samples[~readings, 1], color='red', label='False Readings')
+        ax.scatter(true_location[0], true_location[1], color='blue', marker='x', label='True Location')
+
+        # Add labels and title for each subplot
+        ax.set_title(f'Likelihood (Seed={seed})')
+        ax.set_xlabel('X coordinate')
+        ax.set_ylabel('Y coordinate')
+
+    # Add a single color bar outside the subplots
+    cbar = fig.colorbar(im, ax=axes, orientation='horizontal', fraction=0.05, pad=0.1)
+    cbar.set_label('Likelihood')
+
+    # Add a single legend for all subplots
+    handles = [
+        mpatches.Patch(color='green', label='True Readings'),
+        mpatches.Patch(color='red', label='False Readings'),
+        mpatches.Patch(color='blue', label='True Location')
+    ]
+    fig.legend(handles=handles, loc='upper center', ncol=3)
+
+    # Show the plot
+    plt.show()
 
 def main():
     """
@@ -171,7 +239,10 @@ def main():
     # visualize_background_and_samples(true_location)
 
     # Q2: Calculate the likelihood of the source location given the samples and readings
-    visualize_likelihood()
+    # visualize_likelihood(true_location)
+
+    # Q3: Calculate the likelihood of the source location given the samples and readings on the same point
+    visualize_likelihood_on_same_point_with_subplots(true_location)
 
 if __name__ == "__main__":
     main()
