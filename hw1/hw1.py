@@ -225,6 +225,94 @@ def visualize_likelihood_on_same_point_with_subplots(true_location):
     # Show the plot
     plt.show()
 
+def visualize_sequential_bayes_update(true_location, num_measurements=10):
+    """
+    Visualizes sequential Bayes updates over `num_measurements` measurements
+    from a single fixed sensor location.
+
+    Steps:
+      1) Initialize a uniform prior over a grid of (x, y) in [0,1]^2.
+      2) Sample a measurement from the sensor at one fixed location.
+      3) Update the posterior distribution using Bayes' rule.
+      4) Plot the posterior and the measurement in a 2-by-5 grid of subplots.
+    """
+
+    # 1) Choose a single sensor location and fix it
+    sensor_location = np.array([0.4, 0.5])  # Fixed sensor location
+    
+    # 2) Setup a grid for source-location hypotheses
+    grid_resolution = 50
+    x_vals = np.linspace(0, 1, grid_resolution)
+    y_vals = np.linspace(0, 1, grid_resolution)
+    X, Y = np.meshgrid(x_vals, y_vals)  # shape = (grid_resolution, grid_resolution)
+    
+    # Flatten for easier likelihood calculation:
+    # grid_points is shape (N, 2), where N = grid_resolution^2
+    grid_points = np.column_stack((X.ravel(), Y.ravel()))
+
+    # 3) Initialize uniform prior over the grid
+    prior = np.ones(grid_points.shape[0]) 
+    prior /= prior.sum()  # normalize - this will always normalize to 1
+    # this is a uniform prior, so it doesn't matter where we start
+
+    # Prepare a 2x5 figure
+    fig, axes = plt.subplots(2, 5, figsize=(15, 6), constrained_layout=True)
+    axes = axes.flatten()  # make it a 1D list of axes
+
+    for i in range(num_measurements):
+        # 4) Generate one measurement from the sensor at 'sensor_location'
+        #    We'll reuse the sample_by_location function, but it expects arrays:
+        reading = sample_by_location(sensor_location.reshape(1, 2), true_location)[0]
+
+        # 5) Compute the likelihood p(measurement | each grid point)
+        #    location_function(grid_points, sensor_location) has shape (N,).
+        #    But note the signature: location_function(loc, true_location).
+        #    We want p(reading|loc = s) = location_function(sensor_location, s).
+        #    So we should flip arguments or define a small wrapper:
+        sensor_to_grid = location_function(grid_points, sensor_location)
+        
+        # If reading is True, p(reading|s) = sensor_to_grid
+        # If reading is False, p(reading|s) = 1 - sensor_to_grid
+        if reading:
+            likelihoods = sensor_to_grid
+        else:
+            likelihoods = 1.0 - sensor_to_grid
+
+        # 6) Bayes' update: posterior ∝ prior * likelihood
+        posterior_unnorm = prior * likelihoods
+        posterior = posterior_unnorm / posterior_unnorm.sum()
+
+        # 7) Plot the new posterior in the subplot
+        ax = axes[i]
+        # Reshape posterior back to a 2D grid
+        Z = posterior.reshape(grid_resolution, grid_resolution)
+        im = ax.imshow(Z, extent=(0,1,0,1), origin='lower', cmap='magma')
+        
+        # Plot the sensor location and the true location
+        # reading -> green (True) or red (False)
+        measure_color = 'green' if reading else 'red'
+        ax.scatter(sensor_location[0], sensor_location[1], c=measure_color, marker='o', label='Sensor')
+        ax.scatter(true_location[0], true_location[1], c='blue', marker='x', label='True Source')
+        
+        ax.set_title(f"Measurement {i+1}\nReading = {reading}")
+        ax.set_xlabel("X")
+        ax.set_ylabel("Y")
+
+        # Update prior for the next iteration
+        prior = posterior
+
+    # Add one color bar for all subplots
+    cbar = fig.colorbar(im, ax=axes, fraction=0.04)
+    cbar.set_label('Posterior Probability')
+
+    # Add an overall title
+    fig.suptitle("Q4. Sequential Bayes Update, sensor location = {}".format(sensor_location), fontsize=16)
+
+    # Common legend
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc='upper right', ncol=3)
+    plt.show()
+
 def main():
     """
     Main function to run the program.
@@ -242,7 +330,10 @@ def main():
     # visualize_likelihood(true_location)
 
     # Q3: Calculate the likelihood of the source location given the samples and readings on the same point
-    visualize_likelihood_on_same_point_with_subplots(true_location)
+    # visualize_likelihood_on_same_point_with_subplots(true_location)
+
+    # Q4: Visualize sequential Bayes updates over 10 measurements from a single fixed sensor location
+    visualize_sequential_bayes_update(true_location, num_measurements=10)
 
 if __name__ == "__main__":
     main()
