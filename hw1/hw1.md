@@ -10,7 +10,14 @@
 ## Q3. Repeat the process for Problem 2, but uniformly sample one location in the space and assume that the sensor is stuck at that location for all 100 measurements. Note that the results may vary based on your samples. So randomize your samples for multiple times and feel free to include up to 3 plots if the results are different.    
 ![q3](Q3.png)    
 
-## Q4. ssume the same source location and assume you do not know the source location but instead would like to localize the source from sequential online observations. Uniformly sample one location in the space and assume that the sensor is stuck at that location. Simulate 10 measurements sequentially at that location. For each new measurement from the sensor, use Bayes’ rule to update the belief of the source location, with the initial belief being a uniform distribution. 
+## Q4. Assume the same source location and assume you do not know the source location but instead would like to localize the source from sequential online observations. Uniformly sample one location in the space and assume that the sensor is stuck at that location. Simulate 10 measurements sequentially at that location. For each new measurement from the sensor, use Bayes’ rule to update the belief of the source location, with the initial belief being a uniform distribution. 
 
 For each measurement, visualize the source location (even though your algorithm does not know it), the location where you take the measurement, the measurement (green for positive, red for negative), and the current belief. Organize the plots from the 10 measurements into a 2-by-5 grid.
+
+I placed sensor location at s=[0.4, 0.5] so there's a higher chance proccing the true reading on the sensor.    
 ![q4](Q4.png)
+
+## Q5. Repeat the process for Problem 4, but instead of fixing the location for measurement, you can sample at a new location to take each new measurement. You can choose the sampling strategy for the sensor location, though uniform sampling is sufficient.
+
+I used uniform sampling for resampling sensor location. The initial location is the same as Q4, s=[0.4, 0.5].    
+![q5](Q5.png)
