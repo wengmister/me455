@@ -9,4 +9,8 @@ Turn in: A 2-by-5 grid plot showing the belief and the robot trajectory at time 
 # Randomly sample a source location and an initial location of the robot. Implement the Infotaxis algorithm to choose the optimal action at each time step to maximize the expected entropy reduction until convergence. Generate 3 trials. 
 Turn in: Three 2-by-5 grid plots showing the belief and the robot trajectory at different time steps of each search trial.
 
-![q2](q2.png)
+![q2](q2.png) 
+
+![q2-2](q2-2.png)
+
+![q2-3](q2-3.png)
